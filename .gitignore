@@ -1,0 +1,30 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Data
+audio_files/*.mp3
+audio_files/*.wav
+output/*.csv
+
+# Snakemake
+.snakemake/
+step*.txt
+
+# Logs
+*.log
+
+# OS
+.DS_Store
