@@ -32,13 +32,18 @@ jobs:
 
       - name: Run Snakemake pipeline
         env:
+
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+
           MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
           MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
           MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
           MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
+
           KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}
           KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
+
           BIRD_CLASSIFICATION_API: ${{ secrets.BIRD_CLASSIFICATION_API }}
           SPECIES_DATA_URL: ${{ secrets.SPECIES_DATA_URL }}
         run: |
@@ -48,12 +53,14 @@ jobs:
               fuzzy_threshold="${{ github.event.inputs.fuzzy_threshold }}"
 
       - name: Upload CSV report as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bird-report-csv
           path: output/bird_report.csv
 
       - name: Upload visualization as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bird-report-visualization

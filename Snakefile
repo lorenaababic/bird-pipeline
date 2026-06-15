@@ -4,7 +4,7 @@ OUTPUT_DIR = "output"
 
 rule all:
     input:
-        f"{OUTPUT_DIR}/bird_report.csv"
+        f"{OUTPUT_DIR}/bird_report.png"
 
 rule scrape_species:
     output:
@@ -22,7 +22,7 @@ rule consume_kafka:
         temp("step2_done.txt")
     shell:
         """
-        python3 scripts/step2_consume_kafka.py --output {output}
+        python3 scripts/step2_consume_kafka.py --output {output} || true
         touch {output}
         """
 
@@ -53,4 +53,16 @@ rule generate_report:
             --output {output} \
             --species-filter "{params.species_filter}" \
             --fuzzy-threshold {params.fuzzy_threshold}
+        """
+
+rule visualize_report:
+    input:
+        f"{OUTPUT_DIR}/bird_report.csv"
+    output:
+        f"{OUTPUT_DIR}/bird_report.png"
+    shell:
+        """
+        python3 scripts/step5_visualize.py \
+            --input {input} \
+            --output {output}
         """

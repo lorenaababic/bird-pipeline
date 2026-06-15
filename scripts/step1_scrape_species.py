@@ -1,3 +1,4 @@
+import re
 import argparse
 import requests
 from bs4 import BeautifulSoup
@@ -9,26 +10,22 @@ from utils.mongo_client import MongoDBClient
 from config.config import Config
 
 def scrape_species_data(url):
-    """Scraping taksonomskih podataka o pticama"""
     print(f"Fetching species data from: {url}")
     
     headers = {"User-Agent": "BirdPipeline/1.0"}
     
     try:
-        # Podaci su u JSON formatu na /aves.json
         json_url = f"{url}/aves.json"
         response = requests.get(json_url, headers=headers, timeout=30)
         response.raise_for_status()
         
-        # Parse JSON
         data = response.json()
         
         species_list = []
         
         for item in data:
-            # Generiraj taxonomic_code iz scientific name
-            # (npr. "Guttera pucherani" -> "gutpuc")
-            scientific_name = item.get("scientificName", "")
+   
+            scientific_name = re.sub(r" \(.*?\)", "", item.get("scientificName", "")).strip()            
             parts = scientific_name.split()
             if len(parts) >= 2:
                 taxonomic_code = (parts[0][:3] + parts[1][:3]).lower()
@@ -37,7 +34,7 @@ def scrape_species_data(url):
             
             species = {
                 "taxonomic_code": taxonomic_code,
-                "scientific_name": item.get("scientificName", ""),
+                "scientific_name": scientific_name,                
                 "common_name": item.get("canonicalName", ""),
                 "family": item.get("family", ""),
                 "order": item.get("order", ""),
@@ -54,7 +51,7 @@ def scrape_species_data(url):
         return []
 
 def store_species_in_mongodb(species_list):
-    """Pohrana u MongoDB, izbjegava duplikate"""
+
     mongo_client = MongoDBClient()
     collection = mongo_client.get_collection(Config.SPECIES_COLLECTION)
     
@@ -87,7 +84,7 @@ def main():
     species_data = scrape_species_data(Config.SPECIES_DATA_URL)
     if species_data:
         store_species_in_mongodb(species_data)
-        print("✓ Step 1 completed")
+        print(" Step 1 completed")
 
 if __name__ == "__main__":
     main()

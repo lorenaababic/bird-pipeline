@@ -16,13 +16,9 @@ class BirdKafkaConsumer:
         self.consumer.subscribe([Config.KAFKA_TOPIC])
     
     def consume_all_messages(self):
-        """
-        Konzumira sve trenutne poruke sa Kafke
-        Returns: lista poruka
-        """
+
         messages = []
         
-        # Poll poruke sa timeout-om
         timeout = 5.0
         while True:
             msg = self.consumer.poll(timeout=timeout)
@@ -34,7 +30,6 @@ class BirdKafkaConsumer:
                 print(f"Consumer error: {msg.error()}")
                 break
             
-            # Deserialize JSON
             try:
                 value = json.loads(msg.value().decode('utf-8'))
                 messages.append(value)
@@ -45,5 +40,4 @@ class BirdKafkaConsumer:
         return messages
     
     def close(self):
-        """Zatvara consumer"""
         self.consumer.close()
